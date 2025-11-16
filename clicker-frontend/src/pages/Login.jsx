@@ -13,7 +13,7 @@ export default function Login() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const { setUser, setToken } = useUser();
+    const { setUser } = useUser();
     const navigate = useNavigate();
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,8 +29,8 @@ export default function Login() {
 
         setLoading(true);
         try {
-            const token = await apiFetch("/api/auth/login", { method: "POST", body: form });
-            setToken(token);
+            await apiFetch("/api/auth/login", { method: "POST", body: form });
+            // access токен в HttpOnly cookie, фронт его не видит
             setUser({ username: form.username });
             navigate("/");
         } catch (err) {
@@ -42,7 +42,7 @@ export default function Login() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <Navbar /> {/* Навбар сверху */}
+            <Navbar />
 
             <div className="flex items-center justify-center p-4 min-h-[calc(100vh-64px)]">
                 <Card className="p-6 w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl">
@@ -51,7 +51,6 @@ export default function Login() {
                         Введите свои данные для входа
                     </p>
 
-                    {/* Ошибка */}
                     {error && <Alert type="error">{error}</Alert>}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -83,7 +82,6 @@ export default function Login() {
                         </Button>
                     </form>
 
-                    {/* Ссылки */}
                     <div className="mt-4 text-sm text-gray-700 text-center">
                         <span
                             className="text-emerald-400 hover:text-emerald-500 cursor-pointer transition-colors duration-200"

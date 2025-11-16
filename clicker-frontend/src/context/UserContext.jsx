@@ -1,38 +1,35 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { apiFetch } from '../api/api.js';
 
 const UserContext = createContext();
 
 export function UserProvider({ children }) {
+    const [user, setUser] = useState(null);
 
-    const [user, setUser] = useState(() => {
-        try {
-            return JSON.parse(localStorage.getItem("user")) || null;
-        } catch {
-            return null;
+    // Автоматическая проверка при загрузке страницы
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                const data = await apiFetch("/api/auth/me");
+                setUser({ username: data.username });
+            } catch {
+                setUser(null);
+            }
         }
-    });
+        fetchUser();
+    }, []);
 
-    const [token, setToken] = useState(() => localStorage.getItem("token"));
-
-    useEffect(() => {
-        if (user) localStorage.setItem("user", JSON.stringify(user));
-        else localStorage.removeItem("user");
-
-    }, [user]);
-
-    useEffect(() => {
-        if (token) localStorage.setItem("token", token);
-        else localStorage.removeItem("token");
-
-    }, [token]);
-
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await apiFetch("/api/auth/logout", { method: 'POST' });
+        } catch (err) {
+            console.error("Ошибка при logout:", err);
+        }
         setUser(null);
-        setToken(null);
-    }
+    };
 
     return (
-        <UserContext.Provider value={{ user, setUser, token, setToken, logout }}>
+        <UserContext.Provider value={{ user, setUser, logout }}>
             {children}
         </UserContext.Provider>
     )
